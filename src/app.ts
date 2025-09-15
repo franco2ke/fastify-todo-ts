@@ -1,39 +1,30 @@
 import path from "node:path";
-import autoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
-import { FastifyInstance, FastifyPluginOptions, FastifyServerOptions } from "fastify";
-
-export interface AppOptions extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
-// Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {
-  ajv: {
-    customOptions: {
-      coerceTypes: "array",
-      removeAdditional: "all",
-    },
-  },
-};
+import AutoLoad from "@fastify/autoload";
+import { FastifyInstance, FastifyPluginOptions } from "fastify";
+import options from "./configurations/server-options.js";
+import configLoader from "./configurations/config-loader.js";
 
 export default async function app(fastify: FastifyInstance, opts: FastifyPluginOptions) {
-  // for testing purposes only
-  delete opts.skipOverride;
+  delete opts.skipOverride; // This option only serves testing purpose
 
-  // load external plugins that custom plugins might depend on
-  await fastify.register(autoLoad, {
-    dir: path.join(import.meta.dirname, "plugins/external"),
-    options: { ...opts },
-  });
+  // load configuration before loading other plugins
+  await fastify.register(configLoader);
+  fastify.log.info(
+    `The .env variables and app configuration have ${
+      fastify?.config?.configStatus ? "loaded successfully ✅" : "failed to load ❌"
+    } `
+  );
 
-  console.log(`🎾 ${JSON.stringify(fastify.config)}`);
-
-  // load custom plugins
-  void fastify.register(autoLoad, {
-    dir: path.join(import.meta.dirname, "plugins/app"),
-    options: opts,
+  // load all plugins from plugins folder
+  await fastify.register(AutoLoad, {
+    dir: path.join(import.meta.dirname, "plugins"),
+    ignorePattern: /.*.no-load\.(ts|js)/,
+    options: fastify.config,
   });
 
   // This loads all plugins defined in routes
   // define your routes in one of these
-  void fastify.register(autoLoad, {
+  void fastify.register(AutoLoad, {
     dir: path.join(import.meta.dirname, "routes"),
     autoHooks: true,
     cascadeHooks: true,
@@ -69,7 +60,7 @@ export default async function app(fastify: FastifyInstance, opts: FastifyPluginO
   fastify.setNotFoundHandler(
     {
       preHandler: fastify.rateLimit({
-        max: 3,
+        max: 4,
         timeWindow: 500,
       }),
     },
