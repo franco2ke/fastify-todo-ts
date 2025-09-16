@@ -1,5 +1,12 @@
 import { Client } from "pg";
 
+if (Number(process.env.CAN_CREATE_DATABASE) !== 1) {
+  console.log(
+    "❌ You can't create the database. Set `CAN_CREATE_DATABASE=1` environment variable to allow this operation. ❌ \n"
+  );
+  process.exit(1);
+}
+
 async function createDatabase() {
   const client = new Client({
     host: process.env.POSTGRES_HOST || "localhost",

@@ -14,7 +14,9 @@
     "watch:ts": "tsc -w",
     "dev": "pnpm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"pnpm:watch:ts\" \"pnpm:dev:start\"",
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
-    "db:create": "tsx --env-file=.env ./scripts/create-database.ts"
+    "db:create": "tsx --env-file=.env ./scripts/create-database.ts",
+    "db:drop": "tsx --env-file=.env ./scripts/drop-database.ts",
+    "db:migrate": "node-pg-migrate"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +42,7 @@
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
     "fastify-tsconfig": "^3.0.0",
+    "node-pg-migrate": "^8.0.3",
     "typescript": "~5.8.2"
   }
 }
