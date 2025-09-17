@@ -27,6 +27,7 @@ export default async function app(fastify: FastifyInstance, opts: FastifyPluginO
   void fastify.register(AutoLoad, {
     dir: path.join(import.meta.dirname, "routes"),
     autoHooks: true,
+    ignorePattern: /.*.no-load\.(ts|js)/,
     cascadeHooks: true,
     options: opts,
   });

@@ -23,6 +23,7 @@
   "license": "ISC",
   "dependencies": {
     "@fastify/autoload": "^6.0.0",
+    "@fastify/cookie": "^11.0.2",
     "@fastify/env": "^5.0.2",
     "@fastify/postgres": "^6.0.2",
     "@fastify/rate-limit": "^10.3.0",
