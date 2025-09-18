@@ -1,70 +1,96 @@
 import { FastifyPluginAsyncTypebox, Type } from "@fastify/type-provider-typebox";
+import { FastifyReply, FastifyRequest } from "fastify";
 // import { auth } from "../../../auth.js";
 
 const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
-  // Register authentication catchall endpoint - handles all better-auth routes:
-  //
-  // Core Authentication Routes:
-  // POST /api/auth/sign-up/email - Email signup ✅
-  // POST /api/auth/sign-in/email - Email signin ✅
-  // POST /api/auth/sign-out - Sign out (clears session) ✅
-  // GET  /api/auth/session - Get current session ❌
-  // POST /api/auth/forget-password - Request password reset
-  // POST /api/auth/reset-password - Reset password with token
-  // POST /api/auth/verify-email - Verify email address ✅
-  //
-  // Session Management:
-  // GET  /api/auth/list-sessions - List all user sessions ✅
-  // POST /api/auth/revoke-session - Revoke specific session ❌
-  // POST /api/auth/revoke-sessions - Revoke all sessions ❌
-  //
-  // Two-Factor Authentication (if enabled):
-  // POST /api/auth/two-factor/enable - Enable 2FA
-  // POST /api/auth/two-factor/disable - Disable 2FA
-  // POST /api/auth/two-factor/verify - Verify 2FA code
-  //
-  // Account Management:
-  // POST /api/auth/change-email - Change email address
-  // POST /api/auth/change-password - Change password
-  // POST /api/auth/update-user - Update user profile
-  // DELETE /api/auth/delete-user - Delete user account
+  async function authHandler(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const url = new URL(request.url, `http://${request.headers.host}`);
 
-  /* fastify.route({
-    method: ["GET", "POST"],
-    url: "/*",
-    async handler(request, reply) {
-      try {
-        const url = new URL(request.url, `http://${request.headers.host}`);
+      // Convert Fastify headers to standard Headers object
+      const headers = new Headers();
+      Object.entries(request.headers).forEach(([key, value]) => {
+        if (value) headers.append(key, value.toString());
+      });
 
-        // Convert Fastify headers to standard Headers object
-        const headers = new Headers();
-        Object.entries(request.headers).forEach(([key, value]) => {
-          if (value) headers.append(key, value.toString());
-        });
+      // Create Fetch API-compatible request
+      const req = new Request(url.toString(), {
+        method: request.method,
+        headers,
+        body: request.body ? JSON.stringify(request.body) : undefined,
+      });
 
-        // Create Fetch API-compatible request
-        const req = new Request(url.toString(), {
-          method: request.method,
-          headers,
-          body: request.body ? JSON.stringify(request.body) : undefined,
-        });
+      // Process authentication request
+      const response = await fastify.auth.handler(req);
 
-        // Process authentication request
-        const response = await fastify.auth.handler(req);
+      // Forward response to client
+      reply.status(response.status);
+      response.headers.forEach((value, key) => reply.header(key, value));
+      reply.send(response.body ? await response.text() : null);
+    } catch (error) {
+      fastify.log.error(error, "❌ Authentication Error:");
+      reply.status(500).send({
+        error: "Internal authentication error",
+        code: "AUTH_FAILURE",
+      });
+    }
+  }
 
-        // Forward response to client
-        reply.status(response.status);
-        response.headers.forEach((value, key) => reply.header(key, value));
-        reply.send(response.body ? await response.text() : null);
-      } catch (error) {
-        fastify.log.error(error, "❌ Authentication Error:");
-        reply.status(500).send({
-          error: "Internal authentication error",
-          code: "AUTH_FAILURE",
-        });
-      }
-    },
-  }); */
+  fastify.post("/sign-out", {
+    handler: authHandler,
+  });
+
+  fastify.post("/forget-password", {
+    handler: authHandler, //✅
+  });
+
+  fastify.post("/reset-password", {
+    handler: authHandler, //✅
+  });
+
+  fastify.post("/verify-email", {
+    handler: authHandler, // ❌
+  });
+
+  fastify.get("/list-sessions", {
+    handler: authHandler, // ❌
+  });
+
+  fastify.post("/revoke-session", {
+    handler: authHandler, // ✅
+  });
+
+  fastify.post("/revoke-sessions", {
+    handler: authHandler, // ✅
+  });
+
+  // fastify.post("/two-factor/enable", {
+  //   handler: authHandler,
+  // });
+
+  // fastify.post("/two-factor/disable", {
+  //   handler: authHandler,
+  // });
+
+  // fastify.post("/two-factor/verify", {
+  //   handler: authHandler,
+  // });
+
+  fastify.post("/change-email", {
+    handler: authHandler, // ✅
+  });
+
+  fastify.post("/change-password", {
+    handler: authHandler, // ✅
+  });
+
+  fastify.post("/update-user", {
+    handler: authHandler, // ✅
+  });
+
+  fastify.delete("/delete-user", {
+    handler: authHandler, // ❌
+  });
 
   fastify.post("/sign-up/email", {
     schema: {
