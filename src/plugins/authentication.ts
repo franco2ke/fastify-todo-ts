@@ -1,7 +1,7 @@
 import fp from "fastify-plugin";
 import { betterAuth } from "better-auth";
 import { FastifyInstance, FastifyReply } from "fastify";
-import type { FastifyRequest } from "fastify";
+import type { FastifyPluginOptions, FastifyRequest } from "fastify";
 import type { Session } from "better-auth/types";
 
 declare module "fastify" {
@@ -15,13 +15,10 @@ declare module "fastify" {
   }
 }
 
-async function authenticationPlugin(fastify: FastifyInstance) {
+async function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   const auth = betterAuth({
     database: fastify.pg.pool,
-    emailAndPassword: {
-      enabled: true,
-      requireEmailVerification: false,
-    },
+    ...opts.betterAuth,
   });
 
   fastify.decorate("auth", auth);

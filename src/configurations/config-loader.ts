@@ -17,14 +17,130 @@ declare module "fastify" {
       configStatus: boolean;
       postgres: {
         connectionString: string;
+        databaseString: string;
       };
       rateLimit: {
         max: number;
         timeWindow: string;
       };
+      betterAuth: {};
     };
   }
 }
+
+interface BetterAuthConfig {
+  basePath: string;
+  emailAndPassword: {
+    enabled: boolean;
+    requireEmailVerification: boolean;
+  };
+  user: {
+    modelName: string;
+    fields: {
+      emailVerified: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+  session: {
+    modelName: string;
+    fields: {
+      expiresAt: string;
+      createdAt: string;
+      updatedAt: string;
+      ipAddress: string;
+      userAgent: string;
+      userId: string;
+    };
+    expiresIn: number;
+    updateAge: number;
+    disableSessionRefresh: boolean;
+    cookieCache: {
+      enabled: boolean;
+      maxAge: number;
+    };
+  };
+  account: {
+    modelName: string;
+    fields: {
+      accountId: string;
+      providerId: string;
+      userId: string;
+      accessToken: string;
+      refreshToken: string;
+      idToken: string;
+      createdAt: string;
+      updatedAt: string;
+      accessTokenExpiresAt: string;
+      refreshTokenExpiresAt: string;
+    };
+  };
+  verification: {
+    modelName: string;
+    fields: {
+      expiresAt: string;
+      createdAt: string;
+      updatedAt: string;
+    };
+  };
+}
+
+export const betterAuthConfig: BetterAuthConfig = {
+  basePath: "/api/auth",
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: false,
+  },
+  user: {
+    modelName: "users",
+    fields: {
+      emailVerified: "email_verified",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
+  },
+  session: {
+    modelName: "sessions",
+    fields: {
+      expiresAt: "expires_at",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      ipAddress: "ip_address",
+      userAgent: "user_agent",
+      userId: "user_id",
+    },
+    expiresIn: 604800,
+    updateAge: 86400,
+    disableSessionRefresh: false,
+    cookieCache: {
+      enabled: false, // Enable caching session in cookie (default: `false`)
+      maxAge: 300, // 5 minutes
+    },
+  },
+  account: {
+    modelName: "accounts",
+    fields: {
+      accountId: "account_id",
+      providerId: "provider_id",
+      userId: "user_id",
+      accessToken: "access_token",
+      refreshToken: "refresh_token",
+      idToken: "id_token",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      accessTokenExpiresAt: "access_token_expires_at",
+      refreshTokenExpiresAt: "refresh_token_expires_at",
+    },
+  },
+  verification: {
+    modelName: "verifications",
+    fields: {
+      expiresAt: "expires_at",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+    },
+  },
+};
 
 const configLoader: FastifyPluginAsyncTypebox = async function (fastify, _opts) {
   await fastify.register(fastifyEnv, {
@@ -42,6 +158,7 @@ const configLoader: FastifyPluginAsyncTypebox = async function (fastify, _opts) 
       max: fastify.secrets.RATE_LIMIT_MAX,
       timeWindow: "1 minute",
     },
+    betterAuth: betterAuthConfig,
   });
 };
 
