@@ -5,7 +5,7 @@ const example: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     onRequest: [fastify.authenticate],
     handler: async function (request, reply) {
       return {
-        description: "This is the root 😍",
+        description: "This is the protected route 🔐",
         user: request.session,
       };
     },
