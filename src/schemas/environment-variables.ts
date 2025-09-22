@@ -9,7 +9,6 @@ const environmentVariablesSchema = Type.Object(
     FASTIFY_CLOSE_GRACE_DELAY: Type.Number(),
     LOG_LEVEL: Type.String(),
 
-    CAN_CREATE_DATABASE: Type.Number(),
     CAN_DROP_DATABASE: Type.Number(),
     CAN_SEED_DATABASE: Type.Number(),
 

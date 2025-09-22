@@ -1,0 +1,11 @@
+-- Create todos table
+CREATE TABLE todos (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  done BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  modified_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  user_id TEXT NOT NULL,
+  CONSTRAINT fk_todos_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+);
