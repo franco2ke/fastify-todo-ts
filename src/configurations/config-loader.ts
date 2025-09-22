@@ -24,6 +24,16 @@ declare module "fastify" {
         timeWindow: string;
       };
       betterAuth: {};
+      swagger: {
+        routePrefix: string;
+        config: {
+          info: {
+            title: string;
+            description: string;
+            version: string;
+          };
+        };
+      };
     };
   }
 }
@@ -159,6 +169,25 @@ const configLoader: FastifyPluginAsyncTypebox = async function (fastify, _opts) 
       timeWindow: "1 minute",
     },
     betterAuth: betterAuthConfig,
+    swagger: {
+      routePrefix: "/documentation",
+      config: {
+        info: {
+          title: "Todo App API 😅",
+          description:
+            "A Fastify based backend for managing task / todos, with BetterAuth authentication.",
+          version: "0.5.0",
+        },
+        // consumes: ["application/json"],
+        // produces: ["application/json"],
+        // tags: [
+        //   {
+        //     name: "Hello World",
+        //     description: "You can use these routes to salute whomever you want.",
+        //   },
+        // ],
+      },
+    },
   });
 };
 
