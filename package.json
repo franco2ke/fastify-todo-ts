@@ -16,7 +16,9 @@
     "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
     "db:create": "tsx --env-file=.env ./scripts/create-database.ts",
     "db:drop": "tsx --env-file=.env ./scripts/drop-database.ts",
-    "db:migrate": "node-pg-migrate"
+    "db:migrate": "node-pg-migrate",
+    "db:auth:generate": "pnpx @better-auth/cli@latest generate",
+    "db:auth:migrate": "pnpx @better-auth/cli@latest"
   },
   "keywords": [],
   "author": "",

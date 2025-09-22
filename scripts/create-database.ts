@@ -20,35 +20,6 @@ async function createDatabase() {
     await client.connect();
     console.log("Connected to PostgreSQL");
 
-    // Check if users table exists first (since todos references it)
-    const usersTableExists = await client.query(`
-      SELECT EXISTS (
-        SELECT FROM information_schema.tables 
-        WHERE table_schema = 'public' 
-        AND table_name = 'users'
-      );
-    `);
-
-    if (!usersTableExists.rows[0].exists) {
-      console.log("Creating users table...");
-
-      await client.query(`
-        CREATE TABLE users (
-          id SERIAL PRIMARY KEY,
-          username VARCHAR(255) UNIQUE,
-          email VARCHAR(255) UNIQUE NOT NULL,
-          password VARCHAR(255) NOT NULL,
-          salt VARCHAR(32) NOT NULL,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-
-      console.log("users table created successfully");
-    } else {
-      console.log("users table already exists");
-    }
-
     // Check if todos table exists
     const todosTableExists = await client.query(`
       SELECT EXISTS (

@@ -36,9 +36,18 @@ async function dropTables(client: Client) {
   await client.query("DROP TABLE IF EXISTS todos CASCADE");
   console.log("todos table dropped.");
 
-  // Drop users table
+  // Drop auth tables
+  await client.query("DROP TABLE IF EXISTS accounts CASCADE");
+  console.log("accounts table dropped (auth).");
+
   await client.query("DROP TABLE IF EXISTS users CASCADE");
-  console.log("users table dropped.");
+  console.log("users table dropped (auth).");
+
+  await client.query("DROP TABLE IF EXISTS sessions CASCADE");
+  console.log("sessions table dropped (auth).");
+
+  await client.query("DROP TABLE IF EXISTS verifications CASCADE");
+  console.log("verification table dropped (auth).");
 }
 
 dropDatabase()
