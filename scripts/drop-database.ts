@@ -11,7 +11,7 @@ async function dropDatabase() {
   const client = new Client({
     host: process.env.POSTGRES_HOST || "localhost",
     port: parseInt(process.env.POSTGRES_PORT || "5432"),
-    database: process.env.POSTGRES_DATABASE || "postgres",
+    database: process.env.POSTGRES_DATABASE,
     user: process.env.POSTGRES_USER || "postgres",
     password: process.env.POSTGRES_PASSWORD || "password",
   });
@@ -31,14 +31,29 @@ async function dropDatabase() {
 }
 
 async function dropTables(client: Client) {
-  // Drop tables in reverse order of creation due to foreign key constraints
-  // Drop todos first (has foreign key to users)
-  await client.query("DROP TABLE IF EXISTS todos CASCADE");
-  console.log("todos table dropped.");
+  // Get all tables in the public schema
+  const tablesResult = await client.query(`
+    SELECT tablename 
+    FROM pg_tables 
+    WHERE schemaname = 'public'
+    ORDER BY tablename
+  `);
 
-  // Drop users table
-  await client.query("DROP TABLE IF EXISTS users CASCADE");
-  console.log("users table dropped.");
+  if (tablesResult.rows.length === 0) {
+    console.log("No tables found to drop");
+    return;
+  }
+
+  console.log(`Found ${tablesResult.rows.length} tables to drop`);
+
+  // Drop all tables with CASCADE to handle dependencies
+  for (const row of tablesResult.rows) {
+    const tableName = row.tablename;
+    console.log(`Dropping table: ${tableName}`);
+    await client.query(`DROP TABLE IF EXISTS "${tableName}" CASCADE`);
+  }
+
+  console.log("✅ All tables dropped successfully");
 }
 
 dropDatabase()
