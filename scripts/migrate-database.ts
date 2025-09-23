@@ -1,19 +1,19 @@
-import { Client } from "pg";
-import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { readFile, readdir } from 'fs/promises';
+import { join } from 'path';
+import { Client } from 'pg';
 
 async function runMigrations() {
   const client = new Client({
-    host: process.env.POSTGRES_HOST || "localhost",
-    port: parseInt(process.env.POSTGRES_PORT || "5432"),
-    database: process.env.POSTGRES_DATABASE || "postgres",
-    user: process.env.POSTGRES_USER || "postgres",
-    password: process.env.POSTGRES_PASSWORD || "password",
+    host: process.env.POSTGRES_HOST || 'localhost',
+    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    database: process.env.POSTGRES_DATABASE || 'postgres',
+    user: process.env.POSTGRES_USER || 'postgres',
+    password: process.env.POSTGRES_PASSWORD || 'password',
   });
 
   try {
     await client.connect();
-    console.log("Connected to PostgreSQL");
+    console.log('Connected to PostgreSQL');
 
     // Create migrations tracking table if it doesn't exist
     await client.query(`
@@ -26,14 +26,14 @@ async function runMigrations() {
 
     // Get list of already executed migrations
     const executedMigrations = await client.query(
-      "SELECT filename FROM schema_migrations ORDER BY filename"
+      'SELECT filename FROM schema_migrations ORDER BY filename',
     );
     const executedSet = new Set(executedMigrations.rows.map((row) => row.filename));
 
     // Read migration files from directory
-    const migrationsDir = join(process.cwd(), "migrations/business");
+    const migrationsDir = join(process.cwd(), 'migrations/business');
     const files = await readdir(migrationsDir);
-    const sqlFiles = files.filter((file) => file.endsWith(".sql")).sort(); // Execute in alphabetical order
+    const sqlFiles = files.filter((file) => file.endsWith('.sql')).sort(); // Execute in alphabetical order
 
     console.log(`Found ${sqlFiles.length} migration files`);
 
@@ -46,25 +46,25 @@ async function runMigrations() {
       console.log(`🔄 Executing migration: ${file}`);
 
       const filePath = join(migrationsDir, file);
-      const sql = await readFile(filePath, "utf-8");
+      const sql = await readFile(filePath, 'utf-8');
 
       // Execute migration in a transaction
-      await client.query("BEGIN");
+      await client.query('BEGIN');
       try {
         await client.query(sql);
-        await client.query("INSERT INTO schema_migrations (filename) VALUES ($1)", [file]);
-        await client.query("COMMIT");
+        await client.query('INSERT INTO schema_migrations (filename) VALUES ($1)', [file]);
+        await client.query('COMMIT');
         console.log(`✅ Migration ${file} completed successfully`);
       } catch (error) {
-        await client.query("ROLLBACK");
+        await client.query('ROLLBACK');
         console.error(`❌ Migration ${file} failed:`, error);
         throw error;
       }
     }
 
-    console.log("🎉 All migrations completed successfully");
+    console.log('🎉 All migrations completed successfully');
   } catch (error) {
-    console.error("Migration failed:", error);
+    console.error('Migration failed:', error);
     throw error;
   } finally {
     await client.end();
@@ -73,10 +73,10 @@ async function runMigrations() {
 
 runMigrations()
   .then(() => {
-    console.log("Migration process completed");
+    console.log('Migration process completed');
     process.exit(0);
   })
   .catch((error) => {
-    console.error("Migration process failed:", error);
+    console.error('Migration process failed:', error);
     process.exit(1);
   });

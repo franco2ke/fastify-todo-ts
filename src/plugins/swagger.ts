@@ -1,7 +1,7 @@
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import fp from "fastify-plugin";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fp from 'fastify-plugin';
 
 async function swaggerPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   void fastify.register(fastifySwagger, {

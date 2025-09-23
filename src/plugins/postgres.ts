@@ -1,6 +1,6 @@
-import fp from "fastify-plugin";
-import fastifyPostgres from "@fastify/postgres";
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
+import fastifyPostgres from '@fastify/postgres';
+import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fp from 'fastify-plugin';
 
 async function postgres(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   try {
@@ -20,27 +20,27 @@ async function postgres(fastify: FastifyInstance, opts: FastifyPluginOptions) {
 
     fastify.log.info(
       {
-        database: "PostgreSQL",
-        status: "connected",
+        database: 'PostgreSQL',
+        status: 'connected',
         databaseName: dbInfo.database_name,
         username: dbInfo.username,
-        version: dbInfo.version.split(" ").slice(0, 2).join(" "),
+        version: dbInfo.version.split(' ').slice(0, 2).join(' '),
         currentTime: dbInfo.current_time,
       },
-      "PostgreSQL connection was successful"
+      'PostgreSQL connection was successful',
     );
   } catch (error) {
     fastify.log.error(
       {
-        database: "PostgreSQL",
-        status: "failed",
+        database: 'PostgreSQL',
+        status: 'failed',
         error: error instanceof Error ? error.message : String(error),
         code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
       },
-      "Failed to validate PostgreSQL connection"
+      'Failed to validate PostgreSQL connection',
     );
     throw error;
   }
 }
 
-export default fp(postgres, { name: "postgres-connector" });
+export default fp(postgres, { name: 'postgres-connector' });

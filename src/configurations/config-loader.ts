@@ -1,8 +1,8 @@
-import fastifyEnv from "@fastify/env";
-import fp from "fastify-plugin";
-import { FastifyPluginAsyncTypebox } from "@fastify/type-provider-typebox";
-import { Static } from "@sinclair/typebox";
-import environmentVariablesSchema from "../schemas/environment-variables.js";
+import environmentVariablesSchema from '../schemas/environment-variables.js';
+import fastifyEnv from '@fastify/env';
+import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import { Static } from '@sinclair/typebox';
+import fp from 'fastify-plugin';
 
 // Automatically derive config type from schema
 type ConfigType = Static<typeof environmentVariablesSchema> & {
@@ -10,7 +10,7 @@ type ConfigType = Static<typeof environmentVariablesSchema> & {
 };
 
 // extending the existing FastifyInstance to include a config property
-declare module "fastify" {
+declare module 'fastify' {
   export interface FastifyInstance {
     secrets: ConfigType;
     config: {
@@ -96,28 +96,28 @@ interface BetterAuthConfig {
 }
 
 export const betterAuthConfig: BetterAuthConfig = {
-  basePath: "/api/auth",
+  basePath: '/api/auth',
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
   },
   user: {
-    modelName: "users",
+    modelName: 'users',
     fields: {
-      emailVerified: "email_verified",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
+      emailVerified: 'email_verified',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
   },
   session: {
-    modelName: "sessions",
+    modelName: 'sessions',
     fields: {
-      expiresAt: "expires_at",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-      ipAddress: "ip_address",
-      userAgent: "user_agent",
-      userId: "user_id",
+      expiresAt: 'expires_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      ipAddress: 'ip_address',
+      userAgent: 'user_agent',
+      userId: 'user_id',
     },
     expiresIn: 604800,
     updateAge: 86400,
@@ -128,55 +128,55 @@ export const betterAuthConfig: BetterAuthConfig = {
     },
   },
   account: {
-    modelName: "accounts",
+    modelName: 'accounts',
     fields: {
-      accountId: "account_id",
-      providerId: "provider_id",
-      userId: "user_id",
-      accessToken: "access_token",
-      refreshToken: "refresh_token",
-      idToken: "id_token",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-      accessTokenExpiresAt: "access_token_expires_at",
-      refreshTokenExpiresAt: "refresh_token_expires_at",
+      accountId: 'account_id',
+      providerId: 'provider_id',
+      userId: 'user_id',
+      accessToken: 'access_token',
+      refreshToken: 'refresh_token',
+      idToken: 'id_token',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      accessTokenExpiresAt: 'access_token_expires_at',
+      refreshTokenExpiresAt: 'refresh_token_expires_at',
     },
   },
   verification: {
-    modelName: "verifications",
+    modelName: 'verifications',
     fields: {
-      expiresAt: "expires_at",
-      createdAt: "created_at",
-      updatedAt: "updated_at",
+      expiresAt: 'expires_at',
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
     },
   },
 };
 
 const configLoader: FastifyPluginAsyncTypebox = async function (fastify, _opts) {
   await fastify.register(fastifyEnv, {
-    confKey: "secrets",
+    confKey: 'secrets',
     schema: environmentVariablesSchema,
   });
 
-  fastify.decorate("config", {
+  fastify.decorate('config', {
     configStatus: true,
     postgres: {
       connectionString: `postgres://${fastify.secrets.POSTGRES_USER}:${fastify.secrets.POSTGRES_PASSWORD}@${fastify.secrets.POSTGRES_HOST}:${fastify.secrets.POSTGRES_PORT}/${fastify.secrets.POSTGRES_DATABASE}`,
-      databaseString: "done ✅",
+      databaseString: 'done ✅',
     },
     rateLimit: {
       max: fastify.secrets.RATE_LIMIT_MAX,
-      timeWindow: "1 minute",
+      timeWindow: '1 minute',
     },
     betterAuth: betterAuthConfig,
     swagger: {
-      routePrefix: "/documentation",
+      routePrefix: '/documentation',
       config: {
         info: {
-          title: "Todo App API 😅",
+          title: 'Todo App API 😅',
           description:
-            "A Fastify based backend for managing task / todos, with BetterAuth authentication.",
-          version: "0.5.0",
+            'A Fastify based backend for managing task / todos, with BetterAuth authentication.',
+          version: '0.5.0',
         },
         // consumes: ["application/json"],
         // produces: ["application/json"],
@@ -192,5 +192,5 @@ const configLoader: FastifyPluginAsyncTypebox = async function (fastify, _opts) 
 };
 
 export default fp(configLoader, {
-  name: "application-config",
+  name: 'application-config',
 });

@@ -18,7 +18,8 @@
     "db:setup": "pnpm run db:auth:migrate && pnpm run db:app:migrate",
     "db:app:migrate": "tsx --env-file=.env ./scripts/migrate-database.ts",
     "db:auth:generate": "pnpx @better-auth/cli@latest generate --output ./migrations/auth/schema.sql",
-    "db:auth:migrate": "pnpx @better-auth/cli@latest migrate"
+    "db:auth:migrate": "pnpx @better-auth/cli@latest migrate",
+    "fmt": "prettier --ignore-path .gitignore --ignore-path .prettierignore . --write"
   },
   "keywords": [],
   "author": "",
@@ -42,11 +43,13 @@
     "tsx": "^4.20.5"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.1.0",
     "@types/pg": "^8.15.5",
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
     "fastify-tsconfig": "^3.0.0",
+    "prettier": "3.6.2",
     "typescript": "~5.8.2"
   }
 }
