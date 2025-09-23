@@ -6,14 +6,18 @@ async function databaseCheck(fastify: FastifyInstance, opts: FastifyPluginOption
 
   // Check if todos table exists
   try {
-    const todosTableExists = await client.query(`
+    interface ExistsResult {
+      exists: boolean;
+    }
+
+    const todosTableExists = await client.query<ExistsResult>(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'public'
         AND table_name = 'todos'
       )`);
 
-    const usersTableExists = await client.query(`
+    const usersTableExists = await client.query<ExistsResult>(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'public'
@@ -24,8 +28,6 @@ async function databaseCheck(fastify: FastifyInstance, opts: FastifyPluginOption
       fastify.log.info(`Database check was successful`);
       return;
     }
-
-    console.log(todosTableExists);
 
     if (!todosTableExists.rows[0].exists) {
       fastify.log.error('❌ todos table does not exist');

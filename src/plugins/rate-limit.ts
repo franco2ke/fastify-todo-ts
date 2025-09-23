@@ -1,9 +1,13 @@
-import fastifyRateLimit from '@fastify/rate-limit';
+import fastifyRateLimit, { type RateLimitPluginOptions } from '@fastify/rate-limit';
 import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
 
-async function rateLimiter(fastify: FastifyInstance, opts: FastifyPluginOptions) {
-  fastify.register(fastifyRateLimit, {
+interface PluginOptions extends FastifyPluginOptions {
+  rateLimit: RateLimitPluginOptions;
+}
+
+async function rateLimiter(fastify: FastifyInstance, opts: PluginOptions) {
+  await fastify.register(fastifyRateLimit, {
     ...opts.rateLimit,
   });
 }

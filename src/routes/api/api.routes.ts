@@ -1,9 +1,11 @@
-import type { FastifyPluginAsync } from 'fastify';
+import type { FastifyPluginCallback } from 'fastify';
 
-const example: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get('/', async function (request, reply) {
+const example: FastifyPluginCallback = (fastify, opts, done): void => {
+  fastify.get('/', function (request, reply) {
     return { apiRoot: 'this is the api root' };
   });
+
+  done();
 };
 
 export default example;
