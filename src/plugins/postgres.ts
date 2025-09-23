@@ -1,5 +1,5 @@
 import fastifyPostgres from '@fastify/postgres';
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
 
 async function postgres(fastify: FastifyInstance, opts: FastifyPluginOptions) {

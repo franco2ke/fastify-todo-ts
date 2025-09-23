@@ -1,7 +1,7 @@
 import environmentVariablesSchema from '../schemas/environment-variables.js';
 import fastifyEnv from '@fastify/env';
-import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { Static } from '@sinclair/typebox';
+import type { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
+import type { Static } from '@sinclair/typebox';
 import fp from 'fastify-plugin';
 
 // Automatically derive config type from schema
@@ -23,7 +23,7 @@ declare module 'fastify' {
         max: number;
         timeWindow: string;
       };
-      betterAuth: {};
+      betterAuth: object;
       swagger: {
         routePrefix: string;
         config: {

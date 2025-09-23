@@ -1,7 +1,6 @@
 import { betterAuth } from 'better-auth';
 import type { Session } from 'better-auth/types';
-import { FastifyInstance, FastifyReply } from 'fastify';
-import type { FastifyPluginOptions, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
 declare module 'fastify' {
@@ -15,7 +14,7 @@ declare module 'fastify' {
   }
 }
 
-async function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions) {
+function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions): void {
   const auth = betterAuth({
     database: fastify.pg.pool,
     ...opts.betterAuth,
@@ -32,7 +31,7 @@ async function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPlugi
       });
 
       if (!session?.user) {
-        return reply.unauthorized('You must be logged in to access this resource.');
+        return await reply.unauthorized('You must be logged in to access this resource.');
       }
 
       request.setDecorator('session', session);

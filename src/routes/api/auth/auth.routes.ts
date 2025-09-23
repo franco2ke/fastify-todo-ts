@@ -1,5 +1,5 @@
-import { FastifyPluginAsyncTypebox, Type } from '@fastify/type-provider-typebox';
-import { FastifyReply, FastifyRequest } from 'fastify';
+import { type FastifyPluginAsyncTypebox, Type } from '@fastify/type-provider-typebox';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // import { auth } from "../../../auth.js";
 

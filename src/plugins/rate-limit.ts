@@ -1,5 +1,5 @@
 import fastifyRateLimit from '@fastify/rate-limit';
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import fp from 'fastify-plugin';
 
 async function rateLimiter(fastify: FastifyInstance, opts: FastifyPluginOptions) {

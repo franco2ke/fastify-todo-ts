@@ -19,6 +19,7 @@
     "db:app:migrate": "tsx --env-file=.env ./scripts/migrate-database.ts",
     "db:auth:generate": "pnpx @better-auth/cli@latest generate --output ./migrations/auth/schema.sql",
     "db:auth:migrate": "pnpx @better-auth/cli@latest migrate",
+    "lint": "eslint .",
     "fmt": "prettier --ignore-path .gitignore --ignore-path .prettierignore . --write"
   },
   "keywords": [],
@@ -48,6 +49,8 @@
     "@types/pg": "^8.15.5",
     "c8": "^10.1.2",
     "concurrently": "^9.0.0",
+    "eslint": "^9.36.0",
+    "eslint-config-love": "^125.0.0",
     "fastify-tsconfig": "^3.0.0",
     "prettier": "3.6.2",
     "typescript": "~5.8.2"

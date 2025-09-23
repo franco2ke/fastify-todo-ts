@@ -1,5 +1,5 @@
 import AutoLoad from '@fastify/autoload';
-import { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import path from 'node:path';
 
 import configLoader from './configurations/config-loader.js';
@@ -12,7 +12,7 @@ export default async function app(fastify: FastifyInstance, opts: FastifyPluginO
   await fastify.register(configLoader);
   fastify.log.info(
     `The .env variables and app configuration have ${
-      fastify?.config?.configStatus ? 'loaded successfully ✅' : 'failed to load ❌'
+      fastify.config.configStatus ? 'loaded successfully ✅' : 'failed to load ❌'
     } `,
   );
 
@@ -51,7 +51,7 @@ export default async function app(fastify: FastifyInstance, opts: FastifyPluginO
     reply.code(err.statusCode ?? 500);
 
     let message = 'Internal Server Error';
-    if (err.statusCode && err.statusCode < 500) {
+    if (typeof err.statusCode === 'number' && err.statusCode < 500) {
       message = err.message;
     }
 
