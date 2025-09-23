@@ -1,14 +1,19 @@
-import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import fp from "fastify-plugin";
-import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
+import fastifySwagger, { type SwaggerOptions } from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
+import type { FastifyInstance, FastifyPluginOptions } from 'fastify';
+import fp from 'fastify-plugin';
 
-async function swaggerPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions) {
-  void fastify.register(fastifySwagger, {
-    swagger: { ...opts.swagger.config },
-  });
+interface PluginOptions extends FastifyPluginOptions {
+  swagger: {
+    config: SwaggerOptions;
+    routePrefix: string;
+  };
+}
 
-  void fastify.register(fastifySwaggerUi, {
+async function swaggerPlugin(fastify: FastifyInstance, opts: PluginOptions) {
+  await fastify.register(fastifySwagger, opts.swagger.config);
+
+  await fastify.register(fastifySwaggerUi, {
     routePrefix: opts.swagger.routePrefix,
   });
 }

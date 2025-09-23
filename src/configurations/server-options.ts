@@ -1,4 +1,4 @@
-import { FastifyServerOptions } from "fastify";
+import type { FastifyServerOptions } from 'fastify';
 
 // NOTE: these options are passed to the fastify constructor / factory function
 // Used when creating the root application instance, before any plugins load
@@ -7,8 +7,8 @@ import { FastifyServerOptions } from "fastify";
 const options: FastifyServerOptions = {
   ajv: {
     customOptions: {
-      coerceTypes: "array",
-      removeAdditional: "all",
+      coerceTypes: 'array',
+      removeAdditional: 'all',
     },
   },
 };

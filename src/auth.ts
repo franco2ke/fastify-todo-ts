@@ -1,6 +1,7 @@
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-import { betterAuthConfig } from "./configurations/config-loader.js";
+import { betterAuth } from 'better-auth';
+import { Pool } from 'pg';
+
+import { betterAuthConfig } from './configurations/config-loader.js';
 
 export const auth = betterAuth({
   database: new Pool({
@@ -12,3 +13,5 @@ export const auth = betterAuth({
   }),
   ...betterAuthConfig,
 });
+
+export type Session = typeof auth.$Infer.Session;

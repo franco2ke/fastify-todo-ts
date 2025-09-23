@@ -1,9 +1,9 @@
-import { FastifyPluginAsync } from "fastify";
-import fastifyPlugin from "fastify-plugin";
+import type { FastifyPluginCallback } from 'fastify';
+import fastifyPlugin from 'fastify-plugin';
 
-const root: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get("/", async function (request, reply) {
-    return "This is the root/base route";
+const root: FastifyPluginCallback = (fastify, opts): void => {
+  fastify.get('/', function (request, reply) {
+    reply.send('This is the root/base route');
   });
 };
 

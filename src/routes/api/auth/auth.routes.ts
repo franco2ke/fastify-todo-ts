@@ -1,8 +1,7 @@
-import { FastifyPluginAsyncTypebox, Type } from "@fastify/type-provider-typebox";
-import { FastifyReply, FastifyRequest } from "fastify";
-// import { auth } from "../../../auth.js";
+import { type FastifyPluginCallbackTypebox, Type } from '@fastify/type-provider-typebox';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 
-const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
+const authenticationPlugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
   async function authHandler(request: FastifyRequest, reply: FastifyReply) {
     try {
       const url = new URL(request.url, `http://${request.headers.host}`);
@@ -10,14 +9,25 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
       // Convert Fastify headers to standard Headers object
       const headers = new Headers();
       Object.entries(request.headers).forEach(([key, value]) => {
-        if (value) headers.append(key, value.toString());
+        if (value !== undefined) headers.append(key, value.toString());
       });
+
+      const getRequestBody = (method: string, body: unknown) => {
+        // GET requests shouldn't have bodies
+        if (method === 'GET' || method === 'HEAD') return null;
+
+        // Handle different body types
+        if (body === null || body === undefined) return null;
+        if (typeof body === 'string') return body;
+
+        return JSON.stringify(body);
+      };
 
       // Create Fetch API-compatible request
       const req = new Request(url.toString(), {
         method: request.method,
         headers,
-        body: request.body ? JSON.stringify(request.body) : undefined,
+        body: getRequestBody(request.method, request.body),
       });
 
       // Process authentication request
@@ -25,42 +35,44 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
 
       // Forward response to client
       reply.status(response.status);
-      response.headers.forEach((value, key) => reply.header(key, value));
+      response.headers.forEach((value, key) => {
+        reply.header(key, value);
+      });
       reply.send(response.body ? await response.text() : null);
     } catch (error) {
-      fastify.log.error(error, "❌ Authentication Error:");
+      fastify.log.error(error, '❌ Authentication Error:');
       reply.status(500).send({
-        error: "Internal authentication error",
-        code: "AUTH_FAILURE",
+        error: 'Internal authentication error',
+        code: 'AUTH_FAILURE',
       });
     }
   }
 
-  fastify.post("/sign-out", {
+  fastify.post('/sign-out', {
     handler: authHandler,
   });
 
-  fastify.post("/forget-password", {
+  fastify.post('/forget-password', {
     handler: authHandler, //✅
   });
 
-  fastify.post("/reset-password", {
+  fastify.post('/reset-password', {
     handler: authHandler, //✅
   });
 
-  fastify.post("/verify-email", {
+  fastify.post('/verify-email', {
     handler: authHandler, // ❌
   });
 
-  fastify.get("/list-sessions", {
+  fastify.get('/list-sessions', {
     handler: authHandler, // ❌
   });
 
-  fastify.post("/revoke-session", {
+  fastify.post('/revoke-session', {
     handler: authHandler, // ✅
   });
 
-  fastify.post("/revoke-sessions", {
+  fastify.post('/revoke-sessions', {
     handler: authHandler, // ✅
   });
 
@@ -76,23 +88,23 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
   //   handler: authHandler,
   // });
 
-  fastify.post("/change-email", {
+  fastify.post('/change-email', {
     handler: authHandler, // ✅
   });
 
-  fastify.post("/change-password", {
+  fastify.post('/change-password', {
     handler: authHandler, // ✅
   });
 
-  fastify.post("/update-user", {
+  fastify.post('/update-user', {
     handler: authHandler, // ✅
   });
 
-  fastify.delete("/delete-user", {
+  fastify.delete('/delete-user', {
     handler: authHandler, // ❌
   });
 
-  fastify.post("/sign-up/email", {
+  fastify.post('/sign-up/email', {
     schema: {
       body: Type.Object({
         name: Type.String({
@@ -100,7 +112,7 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
           maxLength: 255,
         }),
         email: Type.String({
-          format: "email",
+          format: 'email',
           minLength: 1,
           maxLength: 255,
         }),
@@ -129,11 +141,11 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
     },
   });
 
-  fastify.post("/sign-in/email", {
+  fastify.post('/sign-in/email', {
     schema: {
       body: Type.Object({
         email: Type.String({
-          format: "email",
+          format: 'email',
           minLength: 1,
           maxLength: 255,
         }),
@@ -147,7 +159,7 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
     handler: async function signInHandler(request, reply) {
       const requestHeaders = new Headers();
       Object.entries(request.headers).forEach(([key, value]) => {
-        if (value) requestHeaders.append(key, value.toString());
+        if (value !== undefined) requestHeaders.append(key, value.toString());
       });
       const { headers, response } = await fastify.auth.api.signInEmail({
         returnHeaders: true,
@@ -155,7 +167,7 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
           email: request.body.email, // required
           password: request.body.password, // required
           rememberMe: true,
-          callbackURL: "https://example.com/callback",
+          callbackURL: 'https://example.com/callback',
         },
         // This endpoint requires session cookies.
         headers: requestHeaders,
@@ -166,27 +178,27 @@ const authenticationPlugin: FastifyPluginAsyncTypebox = async (fastify) => {
         reply.header(key, value);
       });
 
-      console.log(headers);
+      // console.log(headers);
       return { user: response };
     },
   });
 
-  fastify.get("/session", {
+  fastify.get('/session', {
     handler: async function getSessionHandler(request, reply) {
       const requestHeaders = new Headers();
       Object.entries(request.headers).forEach(([key, value]) => {
-        if (value) requestHeaders.append(key, value.toString());
+        if (value !== undefined) requestHeaders.append(key, value.toString());
       });
 
       const data = await fastify.auth.api.getSession({
         headers: requestHeaders,
       });
 
-      console.log(data);
-
       return { user: data };
     },
   });
+
+  done();
 };
 
 export default authenticationPlugin;
