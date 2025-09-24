@@ -5,8 +5,9 @@ const example: FastifyPluginCallback = (fastify, opts) => {
     onRequest: [fastify.authenticate.bind(fastify)],
     handler: function (request: FastifyRequest, reply: FastifyReply) {
       reply.send({
-        description: 'This is the protected route 🔐',
-        user: request.session,
+        description: 'This is a protected route 🔐',
+        user: request.user,
+        session: request.session,
       });
     },
   });

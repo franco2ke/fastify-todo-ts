@@ -1,5 +1,5 @@
 import { betterAuth } from 'better-auth';
-import type { Session } from 'better-auth/types';
+import type { Session, User } from 'better-auth/types';
 import type { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
@@ -11,6 +11,7 @@ declare module 'fastify' {
 
   export interface FastifyRequest {
     session: Session | null;
+    user: User | null;
   }
 }
 
@@ -22,6 +23,7 @@ function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptio
 
   fastify.decorate('auth', auth);
   fastify.decorateRequest('session', null);
+  fastify.decorateRequest('user', null);
 
   fastify.decorate(
     'authenticate',
@@ -41,12 +43,14 @@ function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptio
         headers: new Headers(requestHeaders),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- better-auth getSession() can return null when user is not authenticated
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- better-auth getSession() can return null session when user is not authenticated, despite type definitions
       if (!sessionData?.session) {
         return await reply.unauthorized('You must be logged in to access this resource.');
       }
 
-      request.setDecorator('session', sessionData);
+      request.setDecorator('session', sessionData.session);
+      request.setDecorator('user', sessionData.user);
+
       return { authenticated: 'true' };
     },
   );

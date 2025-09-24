@@ -10,11 +10,11 @@ async function databaseCheck(fastify: FastifyInstance, opts: FastifyPluginOption
       exists: boolean;
     }
 
-    const todosTableExists = await client.query<ExistsResult>(`
+    const taskTableExists = await client.query<ExistsResult>(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'public'
-        AND table_name = 'todos'
+        AND table_name = 'tasks'
       )`);
 
     const usersTableExists = await client.query<ExistsResult>(`
@@ -24,19 +24,21 @@ async function databaseCheck(fastify: FastifyInstance, opts: FastifyPluginOption
         AND table_name = 'users'
       )`);
 
-    if (todosTableExists.rows[0].exists && usersTableExists.rows[0].exists) {
+    if (taskTableExists.rows[0].exists && usersTableExists.rows[0].exists) {
       fastify.log.info(`Database check was successful`);
       return;
     }
 
-    if (!todosTableExists.rows[0].exists) {
-      fastify.log.error('❌ todos table does not exist');
+    if (!taskTableExists.rows[0].exists) {
+      fastify.log.error('❌ tasks table does not exist');
     }
 
     if (!usersTableExists.rows[0].exists) {
       fastify.log.error('❌ users table does not exist');
     }
-    throw new Error(`⚠️  Database has not been initialized. Run 'pnpm: db:create'`);
+    throw new Error(
+      `⚠️  Database has not been initialized. Ensure database scripts have been generated then run 'pnpm: db:setup'`,
+    );
   } catch (error) {
     // FIXME Need to learn how to properly type errors, unable to just log error.msg!
     fastify.log.error(error);
