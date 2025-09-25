@@ -1,7 +1,15 @@
-import { CreateTaskSchema, TaskStatusEnum } from '../../../schemas/tasks.js';
+import {
+  CreateTaskSchema,
+  QueryTaskPaginationSchema,
+  TaskPaginationResultSchema,
+  TaskSchema,
+  TaskStatusEnum,
+  UpdateTaskSchema,
+} from '../../../schemas/tasks.js';
 import { type FastifyPluginCallbackTypebox, Type } from '@fastify/type-provider-typebox';
 
 const plugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
+  // NOTE: Create Task Route
   const { tasksRepository } = fastify;
   fastify.post('/', {
     schema: {
@@ -34,6 +42,104 @@ const plugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
       reply.code(201);
 
       return { id };
+    },
+  });
+
+  // NOTE: Get Task by ID Route
+  fastify.get('/:id', {
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      response: {
+        200: TaskSchema,
+        404: Type.Object({ message: Type.String() }),
+      },
+      tags: ['Tasks'],
+    },
+    onRequest: [fastify.authenticate.bind(fastify)],
+    // preHandler: (request, reply) => request.isAdmin(reply),
+    handler: async function (request, reply) {
+      const { id } = request.params;
+
+      const task = await tasksRepository.findById(id);
+      if (!task) {
+        reply.code(404);
+        return { message: 'Task not found' };
+      }
+
+      return task;
+    },
+  });
+
+  // NOTE: Get tasks with pagination, filtering
+  fastify.get('/', {
+    schema: {
+      querystring: QueryTaskPaginationSchema,
+      response: {
+        200: TaskPaginationResultSchema,
+      },
+      tags: ['Tasks'],
+    },
+
+    handler: async function (request) {
+      return await tasksRepository.paginate(request.query);
+    },
+  });
+
+  // NOTE: Update Task Route
+  fastify.patch('/:id', {
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: UpdateTaskSchema,
+      response: {
+        200: TaskSchema,
+        404: Type.Object({ message: Type.String() }),
+      },
+      tags: ['Tasks'],
+    },
+    onRequest: [fastify.authenticate.bind(fastify)],
+    // preHandler: (request, reply) => request.isAdmin(reply),
+    handler: async function (request, reply) {
+      const { id } = request.params;
+
+      const updatedTask = await tasksRepository.update(id, request.body);
+
+      if (!updatedTask) {
+        reply.code(404);
+        return { message: 'Task not found' };
+      }
+
+      return updatedTask;
+    },
+  });
+
+  // NOTE: Delete Task Route
+  fastify.delete('/:id', {
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      response: {
+        204: Type.Null(),
+        404: Type.Object({ message: Type.String() }),
+      },
+      tags: ['Tasks'],
+    },
+    onRequest: [fastify.authenticate.bind(fastify)],
+    // preHandler: (request, reply) => request.isAdmin(reply),
+    handler: async function (request, reply) {
+      const deleted = await tasksRepository.delete(request.params.id);
+
+      if (!deleted) {
+        reply.code(404);
+        return { message: 'Task not found' };
+      }
+
+      reply.code(204);
+      return null;
     },
   });
 

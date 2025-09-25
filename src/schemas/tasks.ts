@@ -49,11 +49,13 @@ export const CreateTaskSchema = Type.Object({
   assigned_user_id: Type.Optional(IdSchema),
 });
 
-// Partial update validation
+// update validation
 export const UpdateTaskSchema = Type.Object({
-  title: StringSchema,
-  description: StringSchema,
+  title: Type.Optional(StringSchema),
+  description: Type.Optional(StringSchema),
+  author_id: Type.Optional(IdSchema),
   assigned_user_id: Type.Optional(IdSchema),
+  status: Type.Optional(TaskStatusSchema),
 });
 
 // Search and pagination parameters
@@ -63,9 +65,7 @@ export const QueryTaskPaginationSchema = Type.Object({
   author_id: Type.Optional(IdSchema),
   assigned_user_id: Type.Optional(IdSchema),
   status: Type.Optional(TaskStatusSchema),
-  order: Type.Optional(
-    Type.Union([Type.Literal('asc'), Type.Literal('desc')], { default: 'desc' }),
-  ),
+  order: Type.Union([Type.Literal('asc'), Type.Literal('desc')], { default: 'desc' }),
 });
 
 export const TaskPaginationResultSchema = Type.Object({
