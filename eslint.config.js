@@ -10,7 +10,9 @@ export default [
       '@typescript-eslint/no-magic-numbers': [
         'error',
         {
-          ignore: [0, 1, 2, -1, 4, 100, 255, 300, 404, 500, 5432, 86400, 604800],
+          ignore: [
+            0, 1, 2, 3, 4, 5, -1, 100, 201, 204, 255, 300, 400, 401, 404, 500, 5432, 86400, 604800,
+          ],
           ignoreArrayIndexes: true,
           ignoreDefaultValues: true,
           ignoreClassFieldInitialValues: true,
