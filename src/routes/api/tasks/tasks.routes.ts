@@ -143,6 +143,56 @@ const plugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
     },
   });
 
+  // NOTE: Assign/Unassign Task Route (Moderator-only)
+  fastify.post('/:id/assign', {
+    schema: {
+      params: Type.Object({
+        id: Type.Number(),
+      }),
+      body: Type.Object({
+        assigned_user_id: Type.Union([Type.String(), Type.Null()]),
+      }),
+      response: {
+        200: TaskSchema,
+        401: Type.Object({ error: Type.String() }),
+        403: Type.Object({ error: Type.String() }),
+        404: Type.Object({ message: Type.String() }),
+      },
+      tags: ['Tasks'],
+    },
+    onRequest: [fastify.authenticate.bind(fastify)],
+    // TODO: Add moderator check when role system is implemented
+    // preHandler: (request, reply) => request.isModerator(reply),
+    handler: async function (request, reply) {
+      const { session } = request;
+      if (!session) {
+        reply.code(401);
+        return { error: 'Authentication required' };
+      }
+
+      // TODO: Replace with proper role check when implemented
+      // For now, assuming all authenticated users can assign tasks
+      // if (!session.user.isModerator) {
+      //   reply.code(403);
+      //   return { error: 'Moderator access required' };
+      // }
+
+      const { id } = request.params;
+      const assignedUserId = request.body.assigned_user_id;
+
+      const updatedTask = await tasksRepository.update(id, {
+        assigned_user_id: assignedUserId ?? undefined,
+      });
+
+      if (!updatedTask) {
+        reply.code(404);
+        return { message: 'Task not found' };
+      }
+
+      return updatedTask;
+    },
+  });
+
   done();
 };
 
