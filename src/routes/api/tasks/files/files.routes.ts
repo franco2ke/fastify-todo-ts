@@ -1,7 +1,10 @@
 import type { UploadTask } from '../../../../plugins/tasks/tasks-repository.js';
+import { QueryTaskPaginationSchema } from '../../../../schemas/tasks.js';
 import fastifyMultipart, { type MultipartFile } from '@fastify/multipart';
 import { type FastifyPluginAsyncTypebox, Type } from '@fastify/type-provider-typebox';
 import { parse as csvParse } from 'csv-parse';
+import { stringify as csvStringify } from 'csv-stringify';
+import { Readable } from 'node:stream';
 
 // Type for CSV row data
 interface CSVRow {
@@ -122,6 +125,45 @@ const fileTasksRoutes: FastifyPluginAsyncTypebox = async function (fastify, _opt
       const createdTaskIds = await fastify.tasksRepository.createMany(normalizedTasks);
       reply.code(201);
       return createdTaskIds.map((id) => ({ id }));
+    },
+  });
+
+  // Download tasks as .csv
+  fastify.route({
+    method: 'GET',
+    url: '/export',
+    schema: {
+      querystring: QueryTaskPaginationSchema,
+    },
+    handler: async function exportTasks(request, reply) {
+      const { tasks } = await this.tasksRepository.paginate(request.query);
+
+      // Create readable stream from tasks array
+      const tasksStream = Readable.from(tasks);
+
+      // Set response headers for CSV download
+      reply.header('content-disposition', 'attachment; filename="task-list.csv"');
+      reply.type('text/csv');
+
+      // Pipe tasks through CSV stringifier and return the stream
+      return tasksStream.pipe(
+        csvStringify({
+          header: true,
+          columns: [
+            'id',
+            'title',
+            'description',
+            'status',
+            'author_id',
+            'assigned_user_id',
+            'created_at',
+            'updated_at',
+          ],
+          cast: {
+            date: (value) => value.toISOString(),
+          },
+        }),
+      );
     },
   });
 };
