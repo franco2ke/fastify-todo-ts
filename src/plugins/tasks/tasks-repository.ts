@@ -19,7 +19,6 @@ declare module 'fastify' {
 type CreateTask = Static<typeof CreateTaskSchema> & { author_id: string };
 type TaskQuery = Static<typeof QueryTaskPaginationSchema>;
 type UpdateTask = Static<typeof UpdateTaskSchema>;
-export type UploadTask = CreateTask & { status?: string };
 
 function createRepository(fastify: FastifyInstance) {
   return {
@@ -39,40 +38,6 @@ function createRepository(fastify: FastifyInstance) {
           ],
         );
         return result.rows[0].id;
-      } finally {
-        client.release();
-      }
-    },
-
-    async createMany(newTasks: UploadTask[]) {
-      if (newTasks.length === 0) return [];
-
-      const client = await fastify.pg.connect();
-
-      try {
-        const values = newTasks
-          .map((_, index) => {
-            const baseIndex = index * 5 + 1;
-            return `($${baseIndex}, $${baseIndex + 1}, $${baseIndex + 2}, $${baseIndex + 3}, $${baseIndex + 4}, NOW(), NOW())`;
-          })
-          .join(', ');
-
-        const params = newTasks.flatMap((task) => [
-          task.title,
-          task.description,
-          task.assigned_user_id ?? task.author_id,
-          task.author_id,
-          task.status ?? 'new',
-        ]);
-
-        const result = await client.query<{ id: number }>(
-          `INSERT INTO tasks (title, description, assigned_user_id, author_id, status, created_at, updated_at)
-           VALUES ${values}
-           RETURNING id`,
-          params,
-        );
-
-        return result.rows.map((row) => row.id);
       } finally {
         client.release();
       }
