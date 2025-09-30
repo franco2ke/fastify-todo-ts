@@ -3,7 +3,6 @@ import {
   QueryTaskPaginationSchema,
   TaskPaginationResultSchema,
   TaskSchema,
-  TaskStatusEnum,
   UpdateTaskSchema,
 } from '../../../schemas/tasks.js';
 import { type FastifyPluginCallbackTypebox, Type } from '@fastify/type-provider-typebox';
@@ -18,6 +17,9 @@ const plugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
         201: {
           id: Type.Number(),
         },
+        400: {
+          error: Type.String(),
+        },
         401: {
           error: Type.String(),
         },
@@ -31,13 +33,17 @@ const plugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
         return { error: 'Unauthorized' };
       }
 
-      const newTask = {
-        ...request.body,
-        author_id: request.session.userId,
-        status: TaskStatusEnum.New,
-      };
+      if (request.body.title === undefined || request.body.description === undefined) {
+        reply.code(400);
+        return { error: 'Incorrect task information, fill title / description fields' };
+      }
 
-      const id = await tasksRepository.create(newTask);
+      const id = await tasksRepository.create({
+        title: request.body.title,
+        description: request.body.description,
+        assigned_user_id: request.body.assigned_user_id,
+        author_id: request.session.userId,
+      });
 
       reply.code(201);
 
@@ -81,9 +87,14 @@ const plugin: FastifyPluginCallbackTypebox = (fastify, _opts, done) => {
       },
       tags: ['Tasks'],
     },
-
+    onRequest: [fastify.authenticate.bind(fastify)],
     handler: async function (request) {
-      return await tasksRepository.paginate(request.query);
+      return await tasksRepository.paginate({
+        ...request.query,
+        page: request.query.page ?? 1,
+        limit: request.query.limit ?? 10,
+        order: request.query.order ?? 'desc',
+      });
     },
   });
 
