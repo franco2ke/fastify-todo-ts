@@ -37,6 +37,34 @@ const administrationPlugin: FastifyPluginCallbackTypebox = (fastify, opts, done)
   // List Users
   fastify.get('/list-users', {
     schema: {
+      querystring: Type.Object({
+        searchValue: Type.Optional(Type.String()),
+        searchField: Type.Optional(Type.Union([Type.Literal('email'), Type.Literal('name')])),
+        searchOperator: Type.Optional(
+          Type.Union([
+            Type.Literal('contains'),
+            Type.Literal('starts_with'),
+            Type.Literal('ends_with'),
+          ]),
+        ),
+        limit: Type.Optional(Type.Number({ minimum: 1, maximum: 1000 })),
+        offset: Type.Optional(Type.Number({ minimum: 0 })),
+        sortBy: Type.Optional(Type.Union([Type.Literal('email'), Type.Literal('name')])),
+        sortDirection: Type.Optional(Type.Union([Type.Literal('asc'), Type.Literal('desc')])),
+        filterField: Type.Optional(Type.Union([Type.Literal('email'), Type.Literal('name')])),
+        filterValue: Type.Optional(Type.String()),
+        filterOperator: Type.Optional(
+          Type.Union([
+            Type.Literal('eq'),
+            Type.Literal('ne'),
+            Type.Literal('lt'),
+            Type.Literal('lte'),
+            Type.Literal('gt'),
+            Type.Literal('gte'),
+            Type.Literal('contains'),
+          ]),
+        ),
+      }),
       tags: ['Admin Functions'],
     },
     // onRequest: [fastify.authenticate.bind(fastify)],
@@ -44,11 +72,18 @@ const administrationPlugin: FastifyPluginCallbackTypebox = (fastify, opts, done)
       // Convert Fastify headers to standard Headers object
       const headers = fastifyHeadersToStandardHeaders(request);
 
-      // TODO To create robust db query from request parameters
-
       const users = await fastify.auth.api.listUsers({
         query: {
-          limit: 20,
+          searchValue: request.query.searchValue,
+          searchField: request.query.searchField,
+          searchOperator: request.query.searchOperator,
+          limit: request.query.limit,
+          offset: request.query.offset,
+          sortBy: request.query.sortBy,
+          sortDirection: request.query.sortDirection,
+          filterField: request.query.filterField,
+          filterValue: request.query.filterValue,
+          filterOperator: request.query.filterOperator,
         },
         // This endpoint requires session cookies
         headers,
