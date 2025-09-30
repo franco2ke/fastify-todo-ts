@@ -1,3 +1,4 @@
+import { fastifyHeadersToStandardHeaders } from '../../../utils/headers-converter.js';
 import { type FastifyPluginCallbackTypebox, Type } from '@fastify/type-provider-typebox';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -7,10 +8,7 @@ const authenticationPlugin: FastifyPluginCallbackTypebox = (fastify, _opts, done
       const url = new URL(request.url, `http://${request.headers.host}`);
 
       // Convert Fastify headers to standard Headers object
-      const headers = new Headers();
-      Object.entries(request.headers).forEach(([key, value]) => {
-        if (value !== undefined) headers.append(key, value.toString());
-      });
+      const headers = fastifyHeadersToStandardHeaders(request);
 
       const getRequestBody = (method: string, body: unknown) => {
         // GET requests shouldn't have bodies
@@ -157,10 +155,7 @@ const authenticationPlugin: FastifyPluginCallbackTypebox = (fastify, _opts, done
     },
 
     handler: async function signInHandler(request, reply) {
-      const requestHeaders = new Headers();
-      Object.entries(request.headers).forEach(([key, value]) => {
-        if (value !== undefined) requestHeaders.append(key, value.toString());
-      });
+      const requestHeaders = fastifyHeadersToStandardHeaders(request);
       const { headers, response } = await fastify.auth.api.signInEmail({
         returnHeaders: true,
         body: {
@@ -185,10 +180,7 @@ const authenticationPlugin: FastifyPluginCallbackTypebox = (fastify, _opts, done
 
   fastify.get('/session', {
     handler: async function getSessionHandler(request, reply) {
-      const requestHeaders = new Headers();
-      Object.entries(request.headers).forEach(([key, value]) => {
-        if (value !== undefined) requestHeaders.append(key, value.toString());
-      });
+      const requestHeaders = fastifyHeadersToStandardHeaders(request);
 
       const data = await fastify.auth.api.getSession({
         headers: requestHeaders,

@@ -97,7 +97,7 @@ const fileTasksRoutes: FastifyPluginAsyncTypebox = async function (fastify, _opt
           error: Type.String(),
         }),
       },
-      tags: ['Tasks', 'Uploads', 'Imports'],
+      tags: ['Task Imports & Exports'],
     },
     onRequest: [fastify.authenticate.bind(fastify)],
     // preHandler: (request, reply) => request.isAdmin(reply),
@@ -134,6 +134,7 @@ const fileTasksRoutes: FastifyPluginAsyncTypebox = async function (fastify, _opt
     url: '/export',
     schema: {
       querystring: QueryTaskPaginationSchema,
+      tags: ['Task Imports & Exports'],
     },
     handler: async function exportTasks(request, reply) {
       const { tasks } = await this.tasksRepository.paginate(request.query);
