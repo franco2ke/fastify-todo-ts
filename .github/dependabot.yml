@@ -5,15 +5,16 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      day: "wednesday"
+      interval: 'weekly'
+      day: 'wednesday'
     open-pull-requests-limit: 10
     groups:
-      dependencies:
-        dependency-type: "production"
+      dependencies-minor:
+        dependency-type: 'production'
+        update-types: ['minor', 'patch']
       dev-dependencies:
-        dependency-type: "development"
-
+        dependency-type: 'development'
+        update-types: ['minor', 'patch']
