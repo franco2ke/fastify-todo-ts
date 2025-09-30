@@ -79,11 +79,10 @@ function createRepository(fastify: FastifyInstance) {
     },
 
     // client added to allow reusing if called from an existing transaction
-    async findById(id: number, client?: PoolClient): Promise<Task | null> {
-      const shouldRelease = !client;
+    async findById(id: number, databaseClient?: PoolClient): Promise<Task | null> {
+      const shouldRelease = !databaseClient;
 
-      // client = client ?? (await fastify.pg.connect());
-      client ??= await fastify.pg.connect();
+      const client = databaseClient ?? (await fastify.pg.connect());
 
       try {
         const result = await client.query<Task>('SELECT * FROM tasks WHERE id = $1', [id]);
@@ -110,20 +109,20 @@ function createRepository(fastify: FastifyInstance) {
         if (q.author_id !== undefined) {
           whereConditions.push(`author_id = $${paramIndex}`);
           queryParams.push(q.author_id);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         // add assigned_user_id filter
         if (q.assigned_user_id !== undefined) {
           whereConditions.push(`assigned_user_id = $${paramIndex}`);
           queryParams.push(q.assigned_user_id);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         if (q.status !== undefined) {
           whereConditions.push(`status = $${paramIndex}`);
           queryParams.push(q.status);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         queryParams.push(q.limit, offset);
@@ -153,10 +152,10 @@ function createRepository(fastify: FastifyInstance) {
       }
     },
 
-    async update(id: number, changes: UpdateTask, client?: PoolClient) {
-      const shouldRelease = !client;
+    async update(id: number, changes: UpdateTask, databaseClient?: PoolClient) {
+      const shouldRelease = !databaseClient;
 
-      client ??= await fastify.pg.connect();
+      const client = databaseClient ?? (await fastify.pg.connect());
 
       try {
         const setClauses: string[] = [];
@@ -166,35 +165,35 @@ function createRepository(fastify: FastifyInstance) {
         if (changes.title !== undefined) {
           setClauses.push(`title = $${paramIndex}`);
           queryParams.push(changes.title);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         if (changes.description !== undefined) {
           setClauses.push(`description = $${paramIndex}`);
           queryParams.push(changes.description);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         if (changes.assigned_user_id !== undefined) {
           setClauses.push(`assigned_user_id = $${paramIndex}`);
           queryParams.push(changes.assigned_user_id);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         if (changes.author_id !== undefined) {
           setClauses.push(`author_id = $${paramIndex}`);
           queryParams.push(changes.author_id);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         if (changes.status !== undefined) {
           setClauses.push(`status = $${paramIndex}`);
           queryParams.push(changes.status);
-          paramIndex++;
+          paramIndex += 1;
         }
 
         if (setClauses.length === 0) {
-          return await this.findById(id, client);
+          return await this.findById(id, databaseClient);
         }
 
         setClauses.push(`updated_at = NOW()`);
@@ -212,7 +211,7 @@ function createRepository(fastify: FastifyInstance) {
           return null;
         }
 
-        return await this.findById(id, client);
+        return await this.findById(id, databaseClient);
       } finally {
         if (shouldRelease) {
           client.release();

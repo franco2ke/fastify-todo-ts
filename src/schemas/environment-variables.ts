@@ -1,4 +1,4 @@
-import { Type } from '@fastify/type-provider-typebox';
+import { type TSchema, Type } from '@sinclair/typebox';
 
 const environmentVariablesSchema = Type.Object(
   {
@@ -23,8 +23,8 @@ const environmentVariablesSchema = Type.Object(
     RATE_LIMIT_MAX: Type.Number({ default: 100 }), // Put it to 4 in your .env file for tests
   },
   {
-    required: ['POSTGRES_USER', 'POSTGRES_PASSWORD'],
+    additionalProperties: false,
   },
-);
+) satisfies TSchema;
 
 export default environmentVariablesSchema;

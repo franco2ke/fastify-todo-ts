@@ -49,7 +49,7 @@ const fileTasksRoutes: FastifyPluginAsyncTypebox = async function (fastify, _opt
         });
       }
 
-      uploadedFile.value = rows;
+      Object.assign(uploadedFile, { value: rows });
     },
     // prevent abouse by limiting file sizes and numbers of uploads
     limits: {
@@ -137,7 +137,12 @@ const fileTasksRoutes: FastifyPluginAsyncTypebox = async function (fastify, _opt
       tags: ['Task Imports & Exports'],
     },
     handler: async function exportTasks(request, reply) {
-      const { tasks } = await this.tasksRepository.paginate(request.query);
+      const { tasks } = await this.tasksRepository.paginate({
+        ...request.query,
+        page: request.query.page ?? 1,
+        limit: request.query.limit ?? 10,
+        order: request.query.order ?? 'desc',
+      });
 
       // Create readable stream from tasks array
       const tasksStream = Readable.from(tasks);

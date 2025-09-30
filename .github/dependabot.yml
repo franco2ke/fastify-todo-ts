@@ -11,10 +11,3 @@ updates:
       interval: 'weekly'
       day: 'wednesday'
     open-pull-requests-limit: 10
-    groups:
-      dependencies-minor:
-        dependency-type: 'production'
-        update-types: ['minor', 'patch']
-      dev-dependencies:
-        dependency-type: 'development'
-        update-types: ['minor', 'patch']

@@ -6,7 +6,8 @@ import configLoader from './configurations/config-loader.js';
 import options from './configurations/server-options.js';
 
 export default async function app(fastify: FastifyInstance, opts: FastifyPluginOptions) {
-  delete opts.skipOverride; // This option only serves testing purpose
+  // Remove skipOverride option as it only serves testing purpose
+  const { skipOverride, ...pluginOpts } = opts;
 
   // load configuration before loading other plugins
   await fastify.register(configLoader);
@@ -30,7 +31,7 @@ export default async function app(fastify: FastifyInstance, opts: FastifyPluginO
     autoHooks: true,
     ignorePattern: /.*.no-load\.(ts|js)/,
     cascadeHooks: true,
-    options: opts,
+    options: pluginOpts,
   });
 
   fastify.setErrorHandler((err, request, reply) => {

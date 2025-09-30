@@ -37,7 +37,6 @@ function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptio
         headers: new Headers(requestHeaders),
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition, @typescript-eslint/strict-boolean-expressions -- better-auth getSession() can return null session when user is not authenticated, despite type definitions
       if (!sessionData?.session) {
         reply.code(401);
         return await reply.send({ error: 'You must be logged in to access this resource.' });
