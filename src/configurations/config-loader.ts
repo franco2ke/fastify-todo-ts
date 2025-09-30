@@ -39,6 +39,21 @@ declare module 'fastify' {
 }
 
 interface BetterAuthConfig {
+  adminOptions: {
+    defaultRole: string;
+    adminRoles: string[];
+    adminUserIds: string[];
+    impersonationSessionDuration: number; // 1 hour
+    schema: {
+      user: {
+        fields: {
+          role: 'roles';
+          banReason: 'ban_reason';
+          banExpires: 'ban_expires';
+        };
+      };
+    };
+  };
   basePath: string;
   emailAndPassword: {
     enabled: boolean;
@@ -96,6 +111,40 @@ interface BetterAuthConfig {
 }
 
 export const betterAuthConfig: BetterAuthConfig = {
+  adminOptions: {
+    defaultRole: 'user',
+    adminRoles: ['admin'],
+    // adminRoles: ['admin', 'super-admin', 'moderator'],
+    // roles: {
+    //   user: {
+    //     authorize: () => ({ success: true }),
+    //     statements: [],
+    //   },
+    //   admin: {
+    //     authorize: () => ({ success: true }),
+    //     statements: [],
+    //   },
+    //   'super-admin': {
+    //     authorize: () => ({ success: true }),
+    //     statements: [],
+    //   },
+    //   moderator: {
+    //     authorize: () => ({ success: true }),
+    //     statements: [],
+    //   },
+    // },
+    adminUserIds: ['jZd5u0aC8i2ugRtBZb4fnsjZl98OSHlT'],
+    impersonationSessionDuration: 60 * 60, // 1 hour
+    schema: {
+      user: {
+        fields: {
+          role: 'roles',
+          banReason: 'ban_reason',
+          banExpires: 'ban_expires',
+        },
+      },
+    },
+  },
   basePath: '/api/auth',
   emailAndPassword: {
     enabled: true,

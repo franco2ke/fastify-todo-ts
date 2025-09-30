@@ -1,26 +1,20 @@
-import { betterAuth } from 'better-auth';
-import type { Session, User } from 'better-auth/types';
+import { type Session, type User, auth } from '../auth.js';
 import type { FastifyInstance, FastifyPluginOptions, FastifyReply, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
 
 declare module 'fastify' {
   export interface FastifyInstance {
-    auth: ReturnType<typeof betterAuth>;
+    auth: typeof auth;
     authenticate(request: FastifyRequest, reply: FastifyReply): Promise<{ authenticated: string }>;
   }
 
   export interface FastifyRequest {
-    session: Session | null;
+    session: Session['session'] | null;
     user: User | null;
   }
 }
 
 function authenticationPlugin(fastify: FastifyInstance, opts: FastifyPluginOptions): void {
-  const auth = betterAuth({
-    database: fastify.pg.pool,
-    ...opts.betterAuth,
-  });
-
   fastify.decorate('auth', auth);
   fastify.decorateRequest('session', null);
   fastify.decorateRequest('user', null);
